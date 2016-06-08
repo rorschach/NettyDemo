@@ -15,7 +15,7 @@ public interface Constants {
     String HOST = "120.25.167.157";
     int PORT = 19080;
 
-    int RECONNECT_DELAY = 10;
+    int HEARD_BEAT_DELAY = 60;
 
     int BYTE_SIZE = 108;
 

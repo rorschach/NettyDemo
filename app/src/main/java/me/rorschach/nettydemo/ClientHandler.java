@@ -6,7 +6,10 @@ import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
+import io.netty.channel.EventLoop;
 import io.netty.channel.SimpleChannelInboundHandler;
+import io.netty.handler.timeout.IdleStateEvent;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Created by lei on 16-6-8.
@@ -15,32 +18,62 @@ import io.netty.channel.SimpleChannelInboundHandler;
 
     private static final String TAG = "ClientHandler";
 
-    //private Channel mChannel;
-
-    @DebugLog @Override public void channelActive(ChannelHandlerContext ctx) throws Exception {
-        super.channelActive(ctx);
-        Log.d(TAG, "channelActive");
+    @Override
+    protected void channelRead0(ChannelHandlerContext channelHandlerContext, Object o)
+            throws Exception {
+        Log.e(TAG, "read: " + o.toString());
     }
 
-    @DebugLog @Override public void channelInactive(ChannelHandlerContext ctx) throws Exception {
+    @Override public void channelActive(ChannelHandlerContext ctx) throws Exception {
+        super.channelActive(ctx);
+        Log.d(TAG, "channelActive");
+
+        RetryHandler.resetRetryCounts();
+        write(ctx.channel(), "{\"userId\":500,\"messageType\":\"Login\"}");
+    }
+
+    @Override public void channelInactive(ChannelHandlerContext ctx) throws Exception {
         super.channelInactive(ctx);
         Log.e(TAG, "channelInactive");
     }
 
-    @Override public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
-        super.channelRead(ctx, msg);
-        Log.d(TAG, "channelRead: " + msg.toString());
+    /**
+     * sent heartBeat per 10s
+     * @param ctx
+     * @param evt
+     */
+    @Override
+    public void userEventTriggered(final ChannelHandlerContext ctx, Object evt) {
+        if (!(evt instanceof IdleStateEvent)) {
+            return;
+        }
+
+        ctx.channel().eventLoop().schedule(new Runnable() {
+            @Override public void run() {
+                Log.d(TAG, "sent heartBeat...");
+                write(ctx.channel(), "{\"userId\":500,\"messageType\":\"Ping\"}");
+            }
+        }, Constants.HEARD_BEAT_DELAY, TimeUnit.SECONDS);
     }
 
-    @Override public void channelReadComplete(ChannelHandlerContext ctx) throws Exception {
-        super.channelReadComplete(ctx);
-        Log.d(TAG, "channelReadComplete: ");
-    }
+    /**
+     * reconnect after 10 s
+     * @param ctx
+     * @throws Exception
+     */
+    @Override
+    public void channelUnregistered(final ChannelHandlerContext ctx) throws Exception {
+        long waitSecond = RetryHandler.calculateRetryCounts();
+        Log.d(TAG, "wait: " + waitSecond + " s to reconnect...");
 
-    @DebugLog @Override
-    protected void channelRead0(ChannelHandlerContext channelHandlerContext, Object o)
-            throws Exception {
-        Log.e(TAG, "read: " + o.toString());
+        final EventLoop loop = ctx.channel().eventLoop();
+        loop.schedule(new Runnable() {
+            @Override
+            public void run() {
+                Log.d(TAG, "start reconnect...");
+               Client.start();
+            }
+        }, waitSecond, TimeUnit.SECONDS);
     }
 
     @DebugLog public void write(Channel channel, String msg) {

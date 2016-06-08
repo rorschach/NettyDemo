@@ -15,30 +15,33 @@
   <Button
       android:id="@+id/login"
       android:layout_width="match_parent"
-      android:layout_height="wrap_content"
+      android:layout_height="0dp"
+      android:layout_weight="1"
       android:text="login"
-      />
-
-  <Button
-      android:id="@+id/ping"
-      android:layout_width="match_parent"
-      android:layout_height="wrap_content"
-      android:text="ping"
       />
 
   <Button
       android:id="@+id/start"
       android:layout_width="match_parent"
-      android:layout_height="wrap_content"
+      android:layout_height="0dp"
+      android:layout_weight="1"
       android:text="start"
       />
 
   <Button
       android:id="@+id/stop"
       android:layout_width="match_parent"
-      android:layout_height="wrap_content"
+      android:layout_height="0dp"
+      android:layout_weight="1"
       android:text="stop"
       />
 
+  <Button
+      android:id="@+id/ping"
+      android:layout_width="match_parent"
+      android:layout_height="0dp"
+      android:layout_weight="1"
+      android:text="ping"
+      />
 
 </LinearLayout>

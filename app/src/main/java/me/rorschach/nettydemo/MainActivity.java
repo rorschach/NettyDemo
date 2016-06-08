@@ -32,10 +32,10 @@ public class MainActivity extends AppCompatActivity {
                 Client.send("{\"userId\":500,\"messageType\":\"Ping\"}");
                 break;
             case R.id.start:
-                Client.start();
+                Client.connect();
                 break;
             case R.id.stop:
-                Client.stop();
+                Client.disconnect();
                 break;
         }
     }

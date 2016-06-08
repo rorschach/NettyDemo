@@ -31,9 +31,13 @@ public class Client {
 
     private static final ClientHandler sHandler = new ClientHandler();
 
+    @DebugLog public static void start() {
+        init();
+        connect();
+    }
+
     @DebugLog public static void init() {
         sBootstrap = configureBootstrap(new Bootstrap(), new NioEventLoopGroup());
-        start();
     }
 
     @DebugLog public static Bootstrap configureBootstrap(Bootstrap b, EventLoopGroup g) {
@@ -50,7 +54,7 @@ public class Client {
                         pipeline.addLast("decoder", new StringDecoder(CharsetUtil.UTF_8));
                         pipeline.addLast("encoder", new StringEncoder(CharsetUtil.UTF_8));
 
-                        pipeline.addLast(new IdleStateHandler(Constants.RECONNECT_DELAY, 0, 0),
+                        pipeline.addLast(new IdleStateHandler(Constants.HEARD_BEAT_DELAY, 0, 0),
                                 sHandler);
                     }
                 });
@@ -58,10 +62,10 @@ public class Client {
         return b;
     }
 
-    @DebugLog public static void start() {
+    @DebugLog public static void connect() {
 
         if (sBootstrap == null) {
-            Log.e(TAG, "start with null bootstrap!!!");
+            Log.e(TAG, "connect with null bootstrap!!!");
             return;
         }
 
@@ -76,15 +80,15 @@ public class Client {
         });
     }
 
-    @DebugLog public static void stop() {
+    @DebugLog public static void disconnect() {
         if (sChannel != null) {
             sChannel.disconnect();
         }else {
-            Log.e(TAG, "stop");
+            Log.e(TAG, "disconnect");
         }
     }
 
-    @DebugLog public static void send(String msg) {
+    public static void send(String msg) {
         sHandler.write(sChannel, msg);
     }
 }
