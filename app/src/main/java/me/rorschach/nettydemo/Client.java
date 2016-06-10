@@ -31,9 +31,17 @@ public class Client {
 
     private static final ClientHandler sHandler = new ClientHandler();
 
+    public static boolean startConnect = false;
+
+    private Client() {
+        throw new IllegalStateException("client should not initialize!");
+    }
+
     @DebugLog public static void start() {
         init();
         connect();
+
+        startConnect = true;
     }
 
     @DebugLog public static void init() {
@@ -84,11 +92,34 @@ public class Client {
         if (sChannel != null) {
             sChannel.disconnect();
         }else {
-            Log.e(TAG, "disconnect");
+            Log.e(TAG, "disconnect but channel is null!");
         }
     }
 
-    public static void send(String msg) {
-        sHandler.write(sChannel, msg);
+    @DebugLog public static void stop() {
+        startConnect = false;
+
+        if (sChannel != null) {
+            sChannel.disconnect();
+        }
+
     }
+
+    public static void send(String msg) {
+        if (startConnect) {
+            sHandler.write(sChannel, msg);
+        }else {
+            Log.e(TAG, "send msg but is disconnect ");
+        }
+    }
+
+    public static void receive(String msg) {
+        Log.d(TAG, "client receive: " + msg);
+        RxBus.getDefault().post(new Event(msg));
+    }
+
+    public static boolean isStartConnect() {
+        return startConnect;
+    }
+
 }

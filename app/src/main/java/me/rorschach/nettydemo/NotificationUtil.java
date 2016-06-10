@@ -20,6 +20,7 @@ public class NotificationUtil {
 
         Notification.Builder builder = new Notification.Builder(context)
                 .setContentTitle(title)
+                .setSmallIcon(R.mipmap.ic_launcher)
                 .setContentText(content);
 
         builder.setVibrate(new long[]{500, 0, 500});

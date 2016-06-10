@@ -22,6 +22,7 @@ import java.util.concurrent.TimeUnit;
     protected void channelRead0(ChannelHandlerContext channelHandlerContext, Object o)
             throws Exception {
         Log.e(TAG, "read: " + o.toString());
+        Client.receive(o.toString());
     }
 
     @Override public void channelActive(ChannelHandlerContext ctx) throws Exception {
@@ -38,12 +39,18 @@ import java.util.concurrent.TimeUnit;
     }
 
     /**
-     * sent heartBeat per 10s
+     * sent heartBeat
      * @param ctx
      * @param evt
      */
     @Override
     public void userEventTriggered(final ChannelHandlerContext ctx, Object evt) {
+
+        if (!Client.isStartConnect()) {
+            Log.e(TAG, "client is not start connect!");
+            return;
+        }
+
         if (!(evt instanceof IdleStateEvent)) {
             return;
         }
@@ -57,12 +64,18 @@ import java.util.concurrent.TimeUnit;
     }
 
     /**
-     * reconnect after 10 s
+     * reconnect
      * @param ctx
      * @throws Exception
      */
     @Override
     public void channelUnregistered(final ChannelHandlerContext ctx) throws Exception {
+
+        if (!Client.isStartConnect()) {
+            Log.e(TAG, "client is not start connect!");
+            return;
+        }
+
         long waitSecond = RetryHandler.calculateRetryCounts();
         Log.d(TAG, "wait: " + waitSecond + " s to reconnect...");
 
